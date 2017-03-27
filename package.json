@@ -1,0 +1,23 @@
+{
+  "name": "ehdev-build",
+  "version": "1.0.0",
+  "description": "ehdev build plugin",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/macisi/ehdev-build.git"
+  },
+  "keywords": [
+    "ehdev"
+  ],
+  "author": "ryan.bian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/macisi/ehdev-build/issues"
+  },
+  "homepage": "https://github.com/macisi/ehdev-build#readme",
+  "dependencies": {
+    "chalk": "^1.1.3"
+  }
+}
