@@ -1,17 +1,18 @@
 const chalk = require('chalk');
 
 const pkg = require('../package.json');
+const builder = require('./builder');
 
 module.exports = {
 
-  command: 'init <type>',
+  command: 'build',
 
   description: pkg.description,
 
   options: [
-    [ '-c, --config', 'generate config only' ]
   ],
 
   action(type, command) {
+    builder.run();
   },
 };
