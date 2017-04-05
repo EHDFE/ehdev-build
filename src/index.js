@@ -10,9 +10,10 @@ module.exports = {
   description: pkg.description,
 
   options: [
+    [ '-a, --analyzer', '分析打包结果'],
   ],
 
-  action(type, command) {
-    builder.run();
+  action(options) {
+    builder.run(options);
   },
 };

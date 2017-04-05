@@ -4,16 +4,13 @@ const webpack = require('webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const { buildFail } = require('./util');
 const configer = require('./configer');
 const projectConfig = require(path.resolve(process.cwd(), './abc.json'));
 
-const serverConfig = {
-  port: '8080',
-};
-
-exports.run = () => {
+exports.run = (options) => {
 
   webpackConfig = configer(projectConfig.type);
 
@@ -28,6 +25,11 @@ exports.run = () => {
       dry: false,
     })
   );
+  if (options.analyzer) {
+    webpackConfig.plugins.push(
+      new BundleAnalyzerPlugin()
+    );
+  }
 
   if (projectConfig.publicPath) {
     webpackConfig.output.publicPath = projectConfig.publicPath;
