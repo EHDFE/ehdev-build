@@ -19,7 +19,7 @@ exports.run = (options) => {
     new ManifestPlugin({
       fileName: 'stats.json',
     }),
-    new CleanWebpackPlugin(['dist'], {
+    new CleanWebpackPlugin([projectConfig.build_path ? projectConfig.build_path: 'dist'], {
       root: process.cwd(),
       verbose: true,
       dry: false,
