@@ -1,12 +1,11 @@
 const ehdevConfigs = require('ehdev-configs');
 
-module.exports = (type) => {
+module.exports = (type, options) => {
+  let configer = ehdevConfigs[type];
   let config;
-  switch (type) {
-    case 'standard':
-    default:
-      config = ehdevConfigs['standard']('production');
-      break;
+  if (!configer) {
+    configer = ehdevConfigs['standard'];
   }
+  config = configer('production', options);
   return config;
 };
