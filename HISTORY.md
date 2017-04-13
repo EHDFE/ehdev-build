@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.0.4
+---
+- `feat` support config ie8 support
+
 ### v1.0.2
 ---
 - `fix` build path does not clean when rebuild by custom buildpath

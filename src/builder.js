@@ -9,13 +9,13 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { buildFail } = require('./util');
 const configer = require('./configer');
 const projectConfig = require(path.resolve(process.cwd(), './abc.json'));
-const SUPPORT_IE8 = projectConfig.type === 'spa_jquery';
 
 process.env.NODE_ENV = 'production';
 
 exports.run = (options) => {
 
   webpackConfig = configer(projectConfig.type);
+  const SUPPORT_IE8 = !!projectConfig.supportIE8;
 
   const UglifyConfig = {};
   
