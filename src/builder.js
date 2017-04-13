@@ -9,13 +9,32 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { buildFail } = require('./util');
 const configer = require('./configer');
 const projectConfig = require(path.resolve(process.cwd(), './abc.json'));
+const SUPPORT_IE8 = projectConfig.type === 'spa_jquery';
+
+process.env.NODE_ENV = 'production';
 
 exports.run = (options) => {
 
   webpackConfig = configer(projectConfig.type);
 
+  const UglifyConfig = {};
+  
+  if (SUPPORT_IE8) {
+    Object.assign(UglifyConfig, {
+      compress: {
+        screw_ie8: false,
+      },
+      mangle: {
+        screw_ie8: false,
+      },
+      output: {
+        screw_ie8: false,
+      },
+    });
+  }
+
   webpackConfig.plugins.push(
-    new UglifyJSPlugin(),
+    new UglifyJSPlugin(UglifyConfig),
     new ManifestPlugin({
       fileName: 'stats.json',
     }),
