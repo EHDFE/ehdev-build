@@ -17,7 +17,9 @@ exports.run = (options) => {
   webpackConfig = configer(projectConfig.type);
   const SUPPORT_IE8 = !!projectConfig.supportIE8;
 
-  const UglifyConfig = {};
+  const UglifyConfig = {
+    sourceMap: true,
+  };
   
   if (SUPPORT_IE8) {
     Object.assign(UglifyConfig, {
