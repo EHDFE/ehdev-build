@@ -1,6 +1,7 @@
 const path = require('path');
 const chalk = require('chalk');
 const webpack = require('webpack');
+const webpackIE8 = require('webpack-legacy');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -10,11 +11,18 @@ const { buildFail } = require('./util');
 const configer = require('./configer');
 const projectConfig = require(path.resolve(process.cwd(), './abc.json'));
 
+let WP;
+if (projectConfig.supportIE8) {
+  WP = webpackIE8;
+} else {
+  WP = webpack;
+}
+
 process.env.NODE_ENV = 'production';
 
 exports.run = (options) => {
 
-  webpackConfig = configer(projectConfig.type);
+  webpackConfig = configer(projectConfig.type, options, projectConfig);
   const SUPPORT_IE8 = !!projectConfig.supportIE8;
 
   const UglifyConfig = {
@@ -57,7 +65,7 @@ exports.run = (options) => {
   }
   
   try {
-    const compiler = webpack(webpackConfig);
+    const compiler = WP(webpackConfig);
 
     compiler.run((err, stats) => {
       if (err) {

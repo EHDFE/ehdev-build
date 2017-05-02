@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.0.6
+---
+- `feat` real support ie8
+
 ### v1.0.4
 ---
 - `feat` support config ie8 support
