@@ -23,7 +23,7 @@
     "ehdev-configs": "~1.0.4",
     "ehdev-configs-legacy": "^1.0.0",
     "uglifyjs-webpack-plugin": "^0.4.0",
-    "webpack": "^2.3.2",
+    "webpack": "2.3.2",
     "webpack-bundle-analyzer": "^2.3.1",
     "webpack-legacy": "^1.15.0",
     "webpack-manifest-plugin": "^1.1.0"
