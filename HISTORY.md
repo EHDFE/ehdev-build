@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.0.8
+---
+- `feat` use webpack-uglify-parallel
+
 ### v1.0.6
 ---
 - `feat` real support ie8

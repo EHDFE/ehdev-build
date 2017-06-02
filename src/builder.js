@@ -1,11 +1,13 @@
 const path = require('path');
 const chalk = require('chalk');
+const os = require('os');
 const webpack = require('webpack');
 const webpackIE8 = require('webpack-legacy');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const UglifyJsParallelPlugin = require('webpack-uglify-parallel');
 
 const { buildFail } = require('./util');
 const configer = require('./configer');
@@ -44,7 +46,10 @@ exports.run = (options) => {
   }
 
   webpackConfig.plugins.push(
-    new UglifyJSPlugin(UglifyConfig),
+    // new UglifyJSPlugin(UglifyConfig),
+    new UglifyJsParallelPlugin(Object.assign({
+      workers: os.cpus().length,
+    }, UglifyConfig)),
     new ManifestPlugin({
       fileName: 'stats.json',
     }),
