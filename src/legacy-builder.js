@@ -107,7 +107,7 @@ module.exports = (options, projectConfig) => {
             dead_code: true,
             drop_debugger: true,
           },
-          mangle: true,
+          mangle: false,
           ie8: false,
         }))
         .pipe(gulp.dest('./dist', {

@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.1.1
+---
+- `change` set mangle to false in legacy-builder
+
 ### v1.1.0
 ---
 - `new` add 'legacy' project build.
