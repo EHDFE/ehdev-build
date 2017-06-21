@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.1.0
+---
+- `new` add 'legacy' project build.
+
 ### v1.0.8
 ---
 - `feat` use webpack-uglify-parallel
