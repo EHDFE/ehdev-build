@@ -7,7 +7,9 @@ const gulp = require('gulp');
 const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
 const logger = require('gulp-logger');
+const gulpif = require('gulp-if');
 const Rx = require('rx-lite');
+const pump = require('pump');
 
 const makePrompt = ({ name, message, choices }) => ({
   type: 'list',
@@ -77,60 +79,82 @@ module.exports = (options, projectConfig) => {
     if (answers.directory) {
       const rootPath = `${answers.project}/${answers.branch}`;
       
-      gulp.src([
-        `${rootPath}/**/*`,
-        `!${rootPath}/**/*.js`,
-        `!${rootPath}/**/*.css`,
-        `!${rootPath}/dist/**/*`,
-      ])
-        .pipe(logger({
+      pump([
+        gulp.src([
+          `${rootPath}/**/*`,
+          `!${rootPath}/**/*.js`,
+          `!${rootPath}/**/*.css`,
+          `!${rootPath}/dist/**/*`,
+        ]),
+        logger({
           before: 'Starting copy assets...',
           after: 'Copy complete!',
           showChnage: true,
-        }))
-        .pipe(gulp.dest('./dist', {
+        }),
+        gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
-        }));
+        }),
+      ]);
 
-      gulp.src([
-        `${rootPath}/**/*.js`,
-        `!${rootPath}/dist/**/*.js`,
-      ])
-        .pipe(logger({
+      pump([
+        gulp.src([
+          `${rootPath}/**/*.js`,
+          `!${rootPath}/dist/**/*.js`,
+        ]),
+        logger({
           before: 'Starting uglify scripts...',
           after: 'Uglify complete!',
           showChnage: true,
-        }))
-        .pipe(uglify({
-          warnings: true,
-          compress: {
-            dead_code: true,
-            drop_debugger: true,
+        }),
+        gulpif(
+          (file) => {
+            if (path.basename(file.path, '.js').includes('.min')) {
+              return false;
+            }
+            return true;
           },
-          mangle: false,
-          ie8: false,
-        }))
-        .pipe(gulp.dest('./dist', {
+          uglify({
+            warnings: true,
+            compress: {
+              dead_code: true,
+              drop_debugger: true,
+            },
+            mangle: false,
+            ie8: false,
+          })),
+        gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
-        }));
+        }),
+      ]);
 
-      gulp.src([
-        `${rootPath}/**/*.css`,
-        `!${rootPath}/dist/**/*.css`,
-      ])
-        .pipe(logger({
+      pump([
+        gulp.src([
+          `${rootPath}/**/*.css`,
+          `!${rootPath}/dist/**/*.css`,
+        ]),
+        logger({
           before: 'Starting cleancss...',
           after: 'Cleancss complete!',
           showChnage: true,
-        }))
-        .pipe(cleanCSS())
-        .pipe(gulp.dest('./dist', {
+        }),
+        gulpif(
+          (file) => {
+            if (path.basename(file.path, '.css').includes('.min')) {
+              return false;
+            }
+            return true;
+          },
+          cleanCSS()
+        ),
+        gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
-        }));
+        }),
+      ]);
 
         const versionContent = `var VERSION = ${new Date().getTime()};`;
         fs.writeFile(`${rootPath}/version.js`, versionContent);
 
+        console.log(chalk.green('构建成功！'));
     } else {
       process.exit(-1);
     }
