@@ -20,8 +20,6 @@
   "dependencies": {
     "chalk": "^1.1.3",
     "clean-webpack-plugin": "^0.1.16",
-    "ehdev-configs": "~1.0.12",
-    "ehdev-configs-legacy": "^1.0.4",
     "gulp": "^3.9.1",
     "gulp-clean-css": "^3.4.2",
     "gulp-if": "^2.0.2",
@@ -35,5 +33,9 @@
     "webpack-legacy": "^1.15.0",
     "webpack-manifest-plugin": "^1.1.0",
     "webpack-uglify-parallel": "^0.1.3"
+  },
+  "peerDependencies": {
+    "ehdev-configs": "^1.0.14",
+    "ehdev-configs-legacy": "^1.0.5"
   }
 }
