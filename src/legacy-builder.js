@@ -144,7 +144,9 @@ module.exports = (options, projectConfig) => {
             }
             return true;
           },
-          cleanCSS()
+          cleanCSS({
+            rebase: false,
+          })
         ),
         gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
