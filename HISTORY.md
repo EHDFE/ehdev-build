@@ -1,6 +1,10 @@
 # HISTORY
 ---
 
+### v1.1.7
+---
+- `fix` expose error when build error in legacy builder.
+ 
 ### v1.1.1
 ---
 - `change` set mangle to false in legacy-builder

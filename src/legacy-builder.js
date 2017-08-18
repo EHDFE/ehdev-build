@@ -121,11 +121,14 @@ module.exports = (options, projectConfig) => {
             },
             mangle: false,
             ie8: false,
-          })),
+          })
+        ),
         gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
         }),
-      ]);
+      ], function(err){
+        console.log(chalk.red(err));
+      });
 
       pump([
         gulp.src([
@@ -151,7 +154,9 @@ module.exports = (options, projectConfig) => {
         gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
         }),
-      ]);
+      ], function(err){
+        console.log(chalk.red(err));
+      });
 
         const versionContent = `var VERSION = ${new Date().getTime()};`;
         fs.writeFile(`${rootPath}/version.js`, versionContent);
