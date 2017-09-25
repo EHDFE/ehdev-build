@@ -28,6 +28,7 @@
     "inquirer": "^3.1.1",
     "os": "^0.1.1",
     "pump": "^1.0.2",
+    "uglify-es": "^3.1.2",
     "webpack": "^3.0.0",
     "webpack-bundle-analyzer": "^2.8.2",
     "webpack-legacy": "^1.15.0",

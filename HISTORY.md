@@ -1,6 +1,11 @@
 # HISTORY
 ---
 
+### v1.1.8
+---
+- `feature` support select minify direcotry when use legacy build.
+- `change` upgrade to uglify-es, which supports minify es6+ code.
+
 ### v1.1.7
 ---
 - `fix` expose error when build error in legacy builder.

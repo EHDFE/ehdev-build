@@ -4,7 +4,8 @@ const stream = require('stream');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const gulp = require('gulp');
-const uglify = require('gulp-uglify');
+const uglifyjs = require('uglify-es');
+const composer = require('gulp-uglify/composer');
 const cleanCSS = require('gulp-clean-css');
 const logger = require('gulp-logger');
 const gulpif = require('gulp-if');
@@ -24,6 +25,7 @@ const makePrompt = ({ name, message, choices }) => ({
 });
 
 const cwd = process.cwd();
+const minify = composer(uglifyjs, console);
 
 module.exports = (options, projectConfig) => {
   const projectList = Object.keys(projectConfig.workspace);
@@ -57,6 +59,21 @@ module.exports = (options, projectConfig) => {
           });
           break;
         case 'directory':
+          const projectDirectory = path.resolve(cwd, `${cacheAnswer.project}/${cacheAnswer.branch}`);
+          fs.readdir(projectDirectory, (err, data) => {
+            const subDir = data.filter(d => {
+              return d !== 'dist' && !d.startsWith('.') && fs.statSync(path.join(projectDirectory, d)).isDirectory();
+            });
+            prompts.onNext({
+              type: 'checkbox',
+              name: 'minifyDirs',
+              message: 'Please select the dirs that you want to apply compressing.',
+              default: subDir.filter(d => d.endsWith('Modules')),
+              choices: subDir,
+            });
+          });
+          break;
+        case 'minifyDirs':
           prompts.onCompleted();
           break;
         default:
@@ -78,90 +95,92 @@ module.exports = (options, projectConfig) => {
   iq.then(answers => {
     if (answers.directory) {
       const rootPath = `${answers.project}/${answers.branch}`;
+      const minifyDirs = answers.minifyDirs;
       
       pump([
-        gulp.src([
-          `${rootPath}/**/*`,
-          `!${rootPath}/**/*.js`,
-          `!${rootPath}/**/*.css`,
-          `!${rootPath}/dist/**/*`,
-        ]),
+        gulp.src(
+          minifyDirs.reduce((prev, dir) => prev.concat([
+            `!${rootPath}/${dir}/**/*.js`,
+            `!${rootPath}/${dir}/**/*.css`,
+          ]), [`${rootPath}/**/*`, '!${rootPath}/dist'])
+        ),
         logger({
           before: 'Starting copy assets...',
           after: 'Copy complete!',
-          showChnage: true,
+          showChange: true,
         }),
         gulp.dest('./dist', {
           cwd: path.resolve(cwd, `${rootPath}`),
         }),
       ]);
 
-      pump([
-        gulp.src([
-          `${rootPath}/**/*.js`,
-          `!${rootPath}/dist/**/*.js`,
-        ]),
-        logger({
-          before: 'Starting uglify scripts...',
-          after: 'Uglify complete!',
-          showChnage: true,
-        }),
-        gulpif(
-          (file) => {
-            if (path.basename(file.path, '.js').includes('.min')) {
-              return false;
-            }
-            return true;
-          },
-          uglify({
-            warnings: true,
-            compress: {
-              dead_code: true,
-              drop_debugger: true,
+      minifyDirs.forEach(function(dir){
+        pump([
+          gulp.src([`${rootPath}/${dir}/**/*.js`]),
+          logger({
+            before: 'Starting uglify scripts...',
+            after: 'Uglify complete!',
+            showChange: true,
+          }),
+          gulpif(
+            (file) => {
+              if (path.basename(file.path, '.js').includes('.min')) {
+                return false;
+              }
+              return true;
             },
-            mangle: false,
-            ie8: false,
-          })
-        ),
-        gulp.dest('./dist', {
-          cwd: path.resolve(cwd, `${rootPath}`),
-        }),
-      ], function(err){
-        console.log(chalk.red(err));
+            minify({
+              warnings: true,
+              compress: {
+                dead_code: true,
+                drop_debugger: true,
+              },
+              mangle: false,
+              ie8: false,
+            })
+          ),
+          gulp.dest(`./dist/${dir}`, {
+            cwd: path.resolve(cwd, `${rootPath}`),
+          }),
+        ], function(err){
+          if (err) {
+            console.log(chalk.red(err));
+          }
+        });
       });
-
-      pump([
-        gulp.src([
-          `${rootPath}/**/*.css`,
-          `!${rootPath}/dist/**/*.css`,
-        ]),
-        logger({
-          before: 'Starting cleancss...',
-          after: 'Cleancss complete!',
-          showChnage: true,
-        }),
-        gulpif(
-          (file) => {
-            if (path.basename(file.path, '.css').includes('.min')) {
-              return false;
-            }
-            return true;
-          },
-          cleanCSS({
-            rebase: false,
-          })
-        ),
-        gulp.dest('./dist', {
-          cwd: path.resolve(cwd, `${rootPath}`),
-        }),
-      ], function(err){
-        console.log(chalk.red(err));
+      minifyDirs.forEach(function(dir){
+        pump([
+          gulp.src(`${rootPath}/${dir}/**/*.css`),
+          logger({
+            before: 'Starting cleancss...',
+            after: 'Cleancss complete!',
+            showChange: true,
+          }),
+          gulpif(
+            (file) => {
+              if (path.basename(file.path, '.css').includes('.min')) {
+                return false;
+              }
+              return true;
+            },
+            cleanCSS({
+              rebase: false,
+            })
+          ),
+          gulp.dest(`./dist/${dir}`, {
+            cwd: path.resolve(cwd, `${rootPath}`),
+          }),
+        ], function(err){
+          if (err) {
+            console.log(chalk.red(err));
+          }
+        });
       });
 
         const versionContent = `var VERSION = ${new Date().getTime()};`;
         fs.writeFile(`${rootPath}/version.js`, versionContent);
 
-        console.log(chalk.green('构建成功！'));
+        console.log(chalk.green('Build Success!'));
     } else {
       process.exit(-1);
     }
