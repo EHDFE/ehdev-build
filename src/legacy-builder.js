@@ -105,25 +105,37 @@ module.exports = (options, projectConfig) => {
     if (answers.directory) {
       const rootPath = `${answers.project}/${answers.branch}`;
       const minifyDirs = answers.minifyDirs;
-
+      let initArr;
       if(answers.uglyStrategy !== '不做处理'){
-        pump([
-          gulp.src(
-            minifyDirs.reduce((prev, dir) => prev.concat([
-              `!${rootPath}/${dir}/**/*.js`,
-              `!${rootPath}/${dir}/**/*.css`,
-            ]), [`${rootPath}/**/*`, `!${rootPath}/dist/**/*`])
-          ),
-          logger({
-            before: 'Starting copy assets...',
-            after: 'Copy complete!',
-            showChange: true,
-          }),
-          gulp.dest('./dist', {
-            cwd: path.resolve(cwd, `${rootPath}`),
-          }),
-        ]);
+        initArr = [`${rootPath}/**/*`, `!${rootPath}/dist/**/*`];
+      } else {
+        initArr = minifyDirs.map((d)=> {
+          return `${rootPath}/${d}/**/*`;
+        });
       }
+
+      pump([
+        gulp.src(
+          minifyDirs.reduce((prev, dir) => prev.concat([
+            `!${rootPath}/${dir}/**/*.js`,
+            `!${rootPath}/${dir}/**/*.css`,
+          ]), initArr).concat([
+            `${rootPath}/*`,
+          ]),
+          {
+            base: rootPath 
+          }
+        ),
+        logger({
+          before: 'Starting copy assets...',
+          after: 'Copy complete!',
+          showChange: true,
+        }),
+        gulp.dest('./dist', {
+          cwd: path.resolve(cwd, `${rootPath}`),
+        }),
+      ]);
+ 
       minifyDirs.forEach(function(dir){
         pump([
           gulp.src([`${rootPath}/${dir}/**/*.js`]),
