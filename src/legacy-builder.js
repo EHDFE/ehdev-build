@@ -111,7 +111,9 @@ module.exports = (options, projectConfig) => {
       } else {
         initArr = minifyDirs.map((d)=> {
           return `${rootPath}/${d}/**/*`;
-        });
+        }).concat([
+          `${rootPath}/*`,
+        ]);
       }
 
       pump([
@@ -119,9 +121,7 @@ module.exports = (options, projectConfig) => {
           minifyDirs.reduce((prev, dir) => prev.concat([
             `!${rootPath}/${dir}/**/*.js`,
             `!${rootPath}/${dir}/**/*.css`,
-          ]), initArr).concat([
-            `${rootPath}/*`,
-          ]),
+          ]), initArr),
           {
             base: rootPath 
           }
