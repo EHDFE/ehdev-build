@@ -30,11 +30,10 @@ const minify = composer(uglifyjs, console);
 module.exports = (options, projectConfig) => {
   const projectList = Object.keys(projectConfig.workspace);
   const prompts = new Rx.Subject();
-  
   const iq = inquirer.prompt(prompts);
   const cacheAnswer = {};
   iq.ui.process.subscribe(
-    ({ name, answer }) => {
+    ({ name, answer }) => { 
       Object.assign(cacheAnswer, {
         [name]: answer,
       });
@@ -75,6 +74,15 @@ module.exports = (options, projectConfig) => {
           });
           break;
         case 'minifyDirs':
+          prompts.onNext({
+            type: 'list',
+            name: 'uglyStrategy',
+            message: '未选中文件处理策略',
+            default: '不做处理',
+            choices: ['不做处理', '直接复制'],
+          });
+          break;
+        case 'uglyStrategy':
           prompts.onCompleted();
           break;
         default:
@@ -97,24 +105,25 @@ module.exports = (options, projectConfig) => {
     if (answers.directory) {
       const rootPath = `${answers.project}/${answers.branch}`;
       const minifyDirs = answers.minifyDirs;
-      
-      pump([
-        gulp.src(
-          minifyDirs.reduce((prev, dir) => prev.concat([
-            `!${rootPath}/${dir}/**/*.js`,
-            `!${rootPath}/${dir}/**/*.css`,
-          ]), [`${rootPath}/**/*`, `!${rootPath}/dist/**/*`])
-        ),
-        logger({
-          before: 'Starting copy assets...',
-          after: 'Copy complete!',
-          showChange: true,
-        }),
-        gulp.dest('./dist', {
-          cwd: path.resolve(cwd, `${rootPath}`),
-        }),
-      ]);
 
+      if(answers.uglyStrategy !== '不做处理'){
+        pump([
+          gulp.src(
+            minifyDirs.reduce((prev, dir) => prev.concat([
+              `!${rootPath}/${dir}/**/*.js`,
+              `!${rootPath}/${dir}/**/*.css`,
+            ]), [`${rootPath}/**/*`, `!${rootPath}/dist/**/*`])
+          ),
+          logger({
+            before: 'Starting copy assets...',
+            after: 'Copy complete!',
+            showChange: true,
+          }),
+          gulp.dest('./dist', {
+            cwd: path.resolve(cwd, `${rootPath}`),
+          }),
+        ]);
+      }
       minifyDirs.forEach(function(dir){
         pump([
           gulp.src([`${rootPath}/${dir}/**/*.js`]),
