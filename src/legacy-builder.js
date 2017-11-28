@@ -12,6 +12,9 @@ const gulpif = require('gulp-if');
 const Rx = require('rx-lite');
 const pump = require('pump');
 
+
+const getSubdirChoices = require('./getSubdirChoices');
+
 const makePrompt = ({ name, message, choices }) => ({
   type: 'list',
   name,
@@ -74,6 +77,27 @@ module.exports = (options, projectConfig) => {
           });
           break;
         case 'minifyDirs':
+          let hasModules = answer.filter((d) => d.endsWith('Modules'));
+          if(!hasModules.length){
+            prompts.onNext({
+              type: 'list',
+              name: 'uglyStrategy',
+              message: '未选中文件处理策略',
+              default: '不做处理',
+              choices: ['不做处理', '直接复制'],
+            });
+          }else{
+            const { defaultChoices, choices } = getSubdirChoices(path.resolve(cwd, `${cacheAnswer.project}/${cacheAnswer.branch}`, hasModules[0]));
+            prompts.onNext({
+              type: 'checkbox',
+              name: 'subDirs',
+              message: 'Please select the  sub dirs that you want to apply compressing.',
+              default: defaultChoices,
+              choices: choices.concat(['All']),
+            });
+          }
+          break;
+        case 'subDirs':
           prompts.onNext({
             type: 'list',
             name: 'uglyStrategy',
@@ -115,7 +139,6 @@ module.exports = (options, projectConfig) => {
           `${rootPath}/*`,
         ]);
       }
-
       pump([
         gulp.src(
           minifyDirs.reduce((prev, dir) => prev.concat([
@@ -200,7 +223,9 @@ module.exports = (options, projectConfig) => {
       });
 
         const versionContent = `var VERSION = ${new Date().getTime()};`;
-        fs.writeFile(`${rootPath}/version.js`, versionContent);
+        fs.writeFile(`${rootPath}/version.js`, versionContent,(err) => {
+          if(err) console.log(err);
+        });
 
         console.log(chalk.green('Build Success!'));
     } else {
