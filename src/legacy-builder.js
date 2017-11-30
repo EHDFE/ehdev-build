@@ -117,6 +117,7 @@ module.exports = (options, projectConfig) => {
                 "Please select the  sub dirs that you want to apply compressing.",
               default: defaultChoices,
               choices: choices.concat(["All"]),
+              pageSize: 15,
             });
           }
           break;
