@@ -1,6 +1,6 @@
 {
   "name": "ehdev-build",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "ehdev build plugin",
   "main": "index.js",
   "scripts": {},
