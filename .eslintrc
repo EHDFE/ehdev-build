@@ -1,0 +1,21 @@
+{
+  "extends": "eslint:recommended",
+  "env": {
+    "jquery": true,
+    "amd": true,
+    "browser": true
+  },
+  "rules": {
+    "no-unused-vars": [1,{"args": "none"}],
+    "no-mixed-spaces-and-tabs": 1,
+    "quotes": [2, "single"]
+  },
+  "globals": {
+      "angular": true,
+      "IS_DEBUG": true,
+      "BASE_URL": true,
+      "LIBS_URL": true,
+      "ENV": true,
+      "VERSION": true
+  }
+}

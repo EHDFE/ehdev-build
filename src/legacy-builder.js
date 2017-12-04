@@ -11,6 +11,7 @@ const logger = require("gulp-logger");
 const gulpif = require("gulp-if");
 const Rx = require("rx-lite");
 const pump = require("pump");
+const eslint = require('gulp-eslint');
 
 const getSubdirChoices = require("./getSubdirChoices");
 
@@ -116,7 +117,7 @@ module.exports = (options, projectConfig) => {
               message:
                 "Please select the  sub dirs that you want to apply compressing.",
               default: defaultChoices,
-              choices: choices.concat(["All"]),
+              choices: choices,
               pageSize: 15,
             });
           }
@@ -161,13 +162,14 @@ module.exports = (options, projectConfig) => {
       let initArr = [];
       let minifyJS = [];
       let minifyCSS = [];
+      let hasProblems = false;
       if (answers.uglyStrategy === "不做处理") {
         initArr = [`${rootPath}/*`];
       } else {
         initArr = [`${rootPath}/**/*`, `!${rootPath}/dist/**/*`];
       }
 
-      if (hasModules && subDirs.indexOf("All") === -1) {
+      if (hasModules) {
         fileSrc = minifyDirs.reduce((prev, dir) => {
           if (dir.endsWith("Modules")) {
             return prev.concat(
@@ -202,6 +204,7 @@ module.exports = (options, projectConfig) => {
           ]);
         }, initArr);
       }
+
       pump([
         gulp.src(fileSrc, {
           base: rootPath,
@@ -233,6 +236,17 @@ module.exports = (options, projectConfig) => {
               }
               return true;
             },
+            eslint({
+              configFile: path.join(__dirname, '../.eslintrc')
+            })
+          ),
+          gulpif(
+            file => {
+              if (path.basename(file.path, ".js").includes(".min")) {
+                return false;
+              }
+              return true;
+            },
             minify({
               warnings: true,
               compress: {
@@ -243,11 +257,22 @@ module.exports = (options, projectConfig) => {
               ie8: false,
             })
           ),
+          eslint.format('html',fs.createWriteStream(`eslintReport-${answers.project}.html`)),
+          eslint.result(function(result){
+            if(result.errorCount>0||result.warningCount>0){
+              hasProblems = true;
+            }
+          }),
           gulp.dest(`./dist`, {
             cwd: path.resolve(cwd, `${rootPath}`),
           }),
         ],
         function(err) {
+          if(hasProblems){
+            console.log(chalk.red(`ESLintError in project! Please check eslintReport-${answers.project}.html for details! Fix and rebuild!`));
+          }else{
+            console.log(chalk.green(`Congrats! No lint problem in build modules!`));
+          }
           if (err) {
             console.log(chalk.red(err));
           }
